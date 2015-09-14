@@ -295,12 +295,25 @@ group by director;
 insert into reviewer values(209, 'Roger Ebert);
 
 -- Q2 Insert 5-star ratings by James Cameron for all movies in the database. Leave the review date as NULL.
-insert into rating values(207, 101, 5, null);
-insert into rating values(207, 101, 5, null);
-insert into rating values(207, 101, 5, null);
-insert into rating values(207, 101, 5, null);
-insert into rating values(207, 101, 5, null);
+insert into rating  
+select rID,mID,5,null from reviewer, movie  
+where name="James Cameron";
 
--- Q3 For all movies that have an average rating of 4 stars or higher, add 25 to the release year. (Update the existing tuples; don't insert new tuples.)
+-- Q3 For all movies that have an average rating of 4 stars or higher, add 25 to the release year. 
+--    (Update the existing tuples; don't insert new tuples.)
+Update movie 
+set year = year + 5
+where mID in (select mID 
+	      from (
+	      	    select avg(stars) as average, movie.mID
+	      	    from rating, movie
+	      	    where movie.mID = rating.mID
+	      	    group by mID 
+	      	    having average >= 4
+	      	    )
+);
 
 -- Q4 Remove all ratings where the movie's year is before 1970 or after 2000, and the rating is fewer than 4 stars.
+delete from rating
+where stars < 4 and 
+      mID in (select mID  from movie where year < 1970 or year > 2000);
