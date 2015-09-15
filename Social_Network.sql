@@ -154,8 +154,50 @@ from highschooler,
 where num > 1 and ID2 = ID;
 
 
+/***************************************SQL Social-Network Query Exercises (extra)************************************/
+/*********************************************************************************************************************/
+-- Q1 For every situation where student A likes student B, but student B likes a different student C, 
+--    return the names and grades of A, B, and C. 
+select h1.name, h1.grade, h2.name, h2.grade, h3.name, h3.grade
+from highschooler h1, highschooler h2, highschooler h3, likes l1, likes l2
+where h1.ID = l1.ID1 and h2.ID = l1.ID2 and h2.ID = l2.ID1 and h3.ID = l2.ID2
+      and l1.ID1 <> l2.ID2;
 
+select h1.name, h1.grade, h2.name, h2.grade, h3.name, h3.grade
+from highschooler h1, highschooler h2, highschooler h3, likes l1, likes l2
+where h1.ID = l1.ID1 and l1.ID2 = h2.ID and h3.ID = l2.ID2 
+and l1.ID1 <> l2.ID2 and l1.ID2 = l2.ID1;
 
+-- Q2 Find those students for whom all of their friends are in different grades from themselves. 
+--    Return the students' names and grades. 
+select name, grade 
+from highschooler
+where ID not in (select h1.ID from highschooler h1, highschooler h2, friend
+                 where h1.ID = ID1 and h2.ID = ID2 and h1.grade = h2.grade);
 
+-- Q3 What is the average number of friends per student? (Your result should be just one number.)
+select avg(counts)
+from (select count(ID2) as counts
+      from friend
+      group by ID1
+     );
 
+-- Q4 Find the number of students who are either friends with Cassandra or are friends of friends of Cassandra. 
+--    Do not count Cassandra, even though technically she is a friend of a friend.
+select count(distinct f1.ID2) + count(distinct f2.ID2) 
+from highschooler, friend f1, friend f2
+where name = 'Cassandra'
+      and ID = f1.ID1 -- direct friend
+      and f1.ID2 = f2.ID1 -- friends of friends of
+      and f2.ID1 <> ID
+      and f2.ID2 <> ID;
 
+-- Q5 Find the name and grade of the student(s) with the greatest number of friends.
+select name, grade 
+from highschooler, (select ID1, max(counts) 
+                    from (
+                          select ID1, count(*) as counts 
+                          from friend group by ID1
+                          )
+                   ) T
+where ID = T.ID1 ;
