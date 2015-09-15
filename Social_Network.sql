@@ -201,3 +201,36 @@ from highschooler, (select ID1, max(counts)
                           )
                    ) T
 where ID = T.ID1 ;
+
+
+/***************************************SQL Social-Network Modification Exercises*************************************/
+/*********************************************************************************************************************/
+-- Q1 It's time for the seniors to graduate. Remove all 12th graders from Highschooler.
+delete from highschooler 
+where grade = 12;
+
+-- Q2 If two students A and B are friends, and A likes B but not vice-versa, remove the Likes tuple.
+delete from likes
+where ID1 in (select l.ID1 from friend f, likes l where f.ID1 = l.ID1 and f.ID2 = l.ID2)
+and ID1 not in (select l1.ID1 from likes l1, likes l2 where l1.ID1 = l2.ID2 and l1.ID2 = l2.ID1);
+
+-- Q3 For all cases where A is friends with B, and B is friends with C, add a new friendship for the pair A and C. 
+--    Do not add duplicate friendships, friendships that already exist, or friendships with oneself. 
+--    (This one is a bit challenging; congratulations if you get it right.)
+insert into friend
+select distinct f1.ID1, f2.ID2
+from friend f1, friend f2
+where f1.ID2 = f2.ID1 -- new
+      and f1.ID1 <> f2.ID2 -- with oneself
+      except -- duplicates and already exist
+      select * from friend;
+      
+-- or
+insert into Friend (id1, id2)
+select DISTINCT i1, i2 from (
+  select F1.id1 as i1, F2.id2 as i2
+  from friend F1  join friend F2 on F1.id2 = F2.id1
+) as t
+where t.i1 != t.i2 -- with oneself
+and not exists (select 1 from Friend where id1=i1 and id2=i2)-- already exist
+and not exists (select 1 from Friend where id2=i1 and id1=i2)-- already exist
