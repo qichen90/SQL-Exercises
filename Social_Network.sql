@@ -86,12 +86,10 @@ where ID in(select ID1
 
 -- Q2 For every student who likes someone 2 or more grades younger than themselves, 
 --    return that student's name and grade, and the name and grade of the student they like. 
-select hname, hgrade, lname, lgrade
-from (select h1.name as hname, h1.grade as hgrade, h2.name as lname, h2.grade as lgrade
-      from highschooler h1, highschooler h2, likes
-      where h1.ID = ID1 and h2.ID = ID2
-            and h1.grade - h2.grade >= 2
-      );
+select h1.name as hname, h1.grade as hgrade, h2.name as lname, h2.grade as lgrade
+from highschooler h1, highschooler h2, likes
+where h1.ID = ID1 and h2.ID = ID2
+      and h1.grade - h2.grade >= 2;
 
 -- Q3 For every pair of students who both like each other, return the name and grade of both students. 
 --    Include each pair only once, with the two names in alphabetical order.
@@ -117,9 +115,10 @@ where h1.ID = ID1 and h2.ID = ID2
 
 -- Q6 Find names and grades of students who only have friends in the same grade. 
 --    Return the result sorted by grade, then by name within each grade. 
-select name, grade
-from highschooler
-where ID not in (select ID1 
+select h.name, h.grade
+from highschooler h, friend f
+where h.ID == f.ID1 
+      and h.ID not in (select ID1 
                  from friend, highschooler h1, highschooler h2 
                  where h1.ID = ID1 and h2.ID = ID2 
                        and h1.grade <> h2.grade)
