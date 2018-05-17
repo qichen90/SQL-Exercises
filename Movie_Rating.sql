@@ -64,7 +64,7 @@ insert into Rating values(208, 104, 3, '2011-01-02');
 -- Q1 Find the titles of all movies directed by Steven Spielberg. 
 Select  tile
 From Movie
-Where director = ' Steven Spielberg';
+Where director = 'Steven Spielberg';
 
 -- Q2 Find all years that have a movie that received a rating of 4 or 5, and sort them in increasing order.
 Select year
